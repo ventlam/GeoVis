@@ -1,0 +1,144 @@
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.bar {
+  fill: steelblue;
+}
+
+.x.axis path {
+  display: none;
+}
+.chart chtext {
+  fill: white;
+}
+
+</style>
+<body>
+<script src="../lib/d3/d3.v3.js"></script>
+<script>
+var prodata ="a";
+var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = 1400 - margin.left - margin.right,
+    height = 700 - margin.top - margin.bottom;
+
+var formatPercent = d3.format(".0%");
+
+var x = d3.scale.ordinal()
+    .rangeRoundBands([0, width], .1);
+
+var y = d3.scale.linear()
+    .range([height, 0]);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+    .tickFormat(formatPercent);
+   /* var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left");*/
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+d3.json("../data/china-provinces.json",function(error,data){
+    if(error) return console.warn(error);
+    // console.log(data.features);
+    // var ff = data.features;
+    // console.log(ff.map(function(d) { return d.properties.NAME; }));
+    var sum = d3.sum(data.features,function(p) {return p.properties.COUNT})
+    console.log(sum);
+    x.domain(data.features.map(function(p) { 
+      return p.properties.NAME; }));
+    y.domain([0,d3.max(data.features,function(p) {return p.properties.COUNT/sum})]);
+   /* console.log(x);
+    console.log(y);*/
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 4)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("用户数");
+  console.log(y);
+  svg.selectAll(".bar")
+      .data(data.features)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return x(d.properties.NAME); })
+      .attr("width", x.rangeBand())
+      .attr("y", function(d) { return  y(d.properties.COUNT/sum); })
+      .attr("height", function(d) { return  height-y(d.properties.COUNT/sum); })
+      .append("chtext")
+      .attr("x",function(d) { return x(d.properties.NAME); })
+      .attr("y",function(d) { return  y(d.properties.COUNT/sum)-1; })
+      .attr("dy",".71em")
+      .style("text-anchor", "end")
+      .text(function(d) {  return d.properties.COUNT;});
+
+
+});
+
+/*d3.tsv("../data/data.tsv", type, function(error, data) {
+  console.log(data);
+  x.domain(data.map(function(d) { return d.letter; }));
+  y.domain([0, d3.max(data, function(d) { return d.frequency; })]);
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Frequency");
+
+  svg.selectAll(".bar")
+      .data(data)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return x(d.letter); })
+      .attr("width", x.rangeBand())
+      .attr("y", function(d) { return y(d.frequency); })
+      .attr("height", function(d) { return height - y(d.frequency); });
+
+});*/
+
+function type(d) {
+  d.features.properties.COUNT = +d.features.properties.COUNT;
+  return d;
+}
+
+</script>

@@ -1,0 +1,118 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AMap User HeatMap</title>
+  <meta charset="utf-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="../lib/leaflet/leaflet.css" />
+  <!--[if lte IE 8]><link rel="stylesheet" href="leaflet/leaflet.ie.css" /><![endif]-->
+
+  <style>
+    #map {
+      width: 1024px;
+      height: 600px;
+    }
+
+    .info {
+      padding: 6px 8px;
+      font: 14px/16px Arial, Helvetica, sans-serif;
+      background: white;
+      background: rgba(255,255,255,0.8);
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      border-radius: 5px;
+    }
+    .info h4 {
+      margin: 0 0 5px;
+      color: #777;
+    }
+
+    .legend {
+      text-align: left;
+      line-height: 18px;
+      color: #555;
+    }
+    .legend i {
+      width: 18px;
+      height: 18px;
+      float: left;
+      margin-right: 8px;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script src="../lib/leaflet/leaflet.js"></script>
+
+  <script type="text/javascript" src="../data/loc.js"></script>
+  <script type="text/javascript">
+
+    var map = L.map('map').setView([37.1024, 108.8964], 4);
+/*
+    var cloudmade = L.tileLayer('http://{s}.tile.cloudmade.com/{key}/{styleId}/256/{z}/{x}/{y}.png', {
+      key: 'BC9A493B41014CAABB98F0471D759707',
+      styleId: 22677
+    }).addTo(map);*/
+ // set a base layer
+ /* L.tileLayer('http://a.tile.stamen.com/toner/{z}/{x}/{y}.png', {
+    attribution: 'stamen http://maps.stamen.com/'
+  }).addTo(map);*/
+/*var layer = L.tileLayer('http://a.tiles.mapbox.com/v3/examples.map-0l53fhk2.json').addTo(map);
+*/
+/*map-9ijuk24y,map-zswgei2n,map-20v6611k,map-zr0njcqy*/
+var vent  = L.tileLayer("http://a.tiles.mapbox.com/v3/examples.map-9ijuk24y/{z}/{x}/{y}.png",{attribution:'vent'}).addTo(map);
+
+
+  function onEachFeature(feature, layer) {
+      var popupContent = "<p>I started out as a GeoJSON " +
+          feature.geometry.type + ", but now I'm a Leaflet vector!</p>";
+
+      if (feature.properties && feature.properties.popupContent) {
+        popupContent += feature.properties.popupContent;
+      }
+
+      layer.bindPopup(popupContent);
+    }
+
+
+    var geojson;
+
+    geojson = L.geoJson(bjloc, {
+      style: style,
+      onEachFeature: onEachFeature
+    }).addTo(map);
+
+    map.attributionControl.addAttribution('高德地图移动端新增用户统计&copy; <a href="http://www.amap.com/">AutoNavi</a>');
+
+
+    var legend = L.control({position: 'bottomright'});
+
+    legend.onAdd = function (map) {
+
+      var div = L.DomUtil.create('div', 'info legend'),
+        grades = [0,5000, 10000, 15000, 20000, 25000, 30000, 50000],
+        labels = [],
+        from, to;
+
+      for (var i = 0; i < grades.length; i++) {
+        from = grades[i];
+        to = grades[i + 1];
+
+        labels.push(
+          '<i style="background:' + getColor(from + 1) + '"></i> ' +
+          from + (to ? '&ndash;' + to : '+'));
+      }
+
+      div.innerHTML = labels.join('<br>');
+      return div;
+    };
+
+    legend.addTo(map);
+
+  </script>
+</body>
+</html>

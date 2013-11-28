@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AMap User Marker</title>
+  <meta charset="utf-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="leaflet/leaflet.css" />
+  <!--[if lte IE 8]><link rel="stylesheet" href="../dist/leaflet.ie.css" /><![endif]-->
+</head>
+<body>
+  <div id="map" style="width: 1308px; height: 600px"></div>
+
+    <script src="leaflet/leaflet.js"></script>
+    <!-- GeoCSV: https://github.com/joker-x/Leaflet.geoCSV -->
+    <script src="leaflet.geocsv-src.js"></script>
+  <script>
+
+
+    var map = L.map('map').setView([37.1024, 108.8964], 4);
+   
+
+   var vent  = L.tileLayer("http://a.tiles.mapbox.com/v3/examples.map-9ijuk24y/{z}/{x}/{y}.png",{attribution:'vent'}).addTo(map);
+
+  L.geoCsv('top2.csv',{
+  titles: ['date', 'time', 'diu','servt','x','y','name','address'],
+  fieldSeparator: ',',
+  lineSeparator: '\n',
+  deleteDobleQuotes: true,
+  firstLineTitles: false,
+  onEachFeature: function (feature, layer) {
+    var popup = '';
+    for (var clave in feature.properties) {
+      var title = geo_csv.getPropertyTitle(clave);
+      popup += '<b>'+title+'</b><br />'+feature.properties[clave]+'<br /><br />';
+    }
+    layer.bindPopup(popup);
+  }
+});
+
+  </script>
+</body>
+</html>
